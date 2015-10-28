@@ -24,8 +24,8 @@ class Network:
 
     def bprop(self, x, y):
         a = x
-        acts = [a]
-        zs = [np.zeros(a.shape)]
+        acts = []
+        zs = []
         for bi, w in zip(self.biases, self.weights):
             z = bi + np.dot(w,a)
             a = sigmoid(z)
@@ -38,8 +38,8 @@ class Network:
         delta_w = [np.zeros(w.shape) for w in self.weights]
         for l in xrange(len(delta_b)-1, 0, -1):
             delta_b[l] = delta_l
-            delta_w[l] = np.dot(delta_l, acts[l].T)
-            delta_l = np.dot(self.weights[l].T, delta_l)*sigmoid_prime(zs[l])
+            delta_w[l] = np.dot(delta_l, acts[l-1].T)
+            delta_l = np.dot(self.weights[l].T, delta_l)*sigmoid_prime(zs[l-1])
         cost = self.loss_fn(acts[-1], y)
         return (delta_b, delta_w, cost)
 
@@ -88,19 +88,19 @@ class Network:
                 
     def loss_fn(self, o, y):
         #mean squared error
-        #e = o - y
-        #return np.sum(e*e)/2
+        e = o - y
+        return np.sum(e*e)/2
         # log likelihood
-        e = -np.log(o[y.argmax()])
+        #e = -np.log(o[y.argmax()])
         return e
 
     def loss_fn_grad(self, o, y):
         # grad of mean squared error
-        #return o - y
-        g = np.zeros(o.shape)
-        g[y.argmax()] = 1.
-        g = o - g
-        return g
+        return o - y
+        #g = np.zeros(o.shape)
+        #g[y.argmax()] = 1.
+        #g = o - g
+        #return g
 
     def sample_mini_batch(self, data, targs, mbsz):
         indx = np.array(range(len(data)))
