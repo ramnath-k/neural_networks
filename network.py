@@ -104,8 +104,8 @@ class Network:
         nabla_w = [np.zeros(w.shape) for w in self.weights]
         cost = 0
         for x, y in zip(data, targs):
-            #delta_b, delta_w = self.bprop(x, y)
-            delta_b, delta_w, cost_x = self.grad_check(x, y)
+            delta_b, delta_w, cost_x = self.bprop(x, y)
+            #delta_b, delta_w, cost_x = self.grad_check(x, y)
             nabla_b = [nb + dnb for nb, dnb in zip(nabla_b, delta_b)]
             nabla_w = [nw + dnw for nw, dnw in zip(nabla_w, delta_w)]
             cost += cost_x
