@@ -127,15 +127,16 @@ class Network:
         self.biases = [b - eta/mbsz*nb for b, nb in zip(self.biases, nabla_b)]
         self.weights = [w - eta/mbsz*(nw + lambda_w*2*w) for w, nw in zip(self.weights, nabla_w)]
         
-    def SGD(self, train_data, train_targs, eta=0.1, lambda_w=0.1, epochs=10, mbsz=5, test_data=None, test_targs=None):
+    def SGD(self, train_data, train_targs, eta=0.1, tau = 10., lambda_w=0.1, epochs=10, mbsz=5, test_data=None, test_targs=None):
         num_iter = int(np.ceil(len(train_data)*1.0/mbsz))
         print 'num_iter/epoch=%d' % num_iter
         for epoch in range(epochs):
             print 'epoch=%d' % epoch
+            eta_e = eta * tau/(tau+epoch)
             for i in range(num_iter):
                 #data, targs = self.sample_mini_batch(train_data, train_targs, mbsz)
                 data, targs = self.choose_mini_batch(train_data, train_targs, mbsz, i)
-                self.update_mini_batch(data, targs, eta, lambda_w, mbsz)
+                self.update_mini_batch(data, targs, eta_e, lambda_w, mbsz)
             if test_data != None:
                 print 'train error = %f, validation error = %f' % (self.classification_error(train_data, train_targs), 
 self.classification_error(test_data, test_targs))
@@ -173,7 +174,7 @@ if __name__ == "__main__":
 
     net = Network([784, 200, 100, 50, 10])
     net.SGD(train_data, train_targs, test_data = validation_data, test_targs = validation_targs, \
-            eta=5., lambda_w = 0.0001, mbsz = 64, epochs=30)
+            eta=5., lambda_w = 0.0001, mbsz = 64, epochs=300)
 
     predictions = net.get_predictions(test_data)
     predictions = [p.argmax() for p in predictions]
