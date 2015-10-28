@@ -87,11 +87,20 @@ class Network:
         return (dgb, dgw, cost)
                 
     def loss_fn(self, o, y):
-        e = o - y
-        return np.sum(e*e)/2
+        #mean squared error
+        #e = o - y
+        #return np.sum(e*e)/2
+        # log likelihood
+        e = -np.log(o[y.argmax()])
+        return e
 
     def loss_fn_grad(self, o, y):
-        return o - y
+        # grad of mean squared error
+        #return o - y
+        g = np.zeros(o.shape)
+        g[y.argmax()] = 1.
+        g = o - g
+        return g
 
     def sample_mini_batch(self, data, targs, mbsz):
         indx = np.array(range(len(data)))
@@ -148,7 +157,8 @@ if __name__ == "__main__":
     import mnist_loader as loader
     train_data, train_targs, test_data = loader.load_kaggle_mnist_data()
 
-    vsz = int(np.ceil(train_data.shape[0]*0.1))
+    vsz = int(np.ceil(train_data.shape[0]*0.2))
+    print 'Validation set size = %d' % vsz
     train_data = train_data[vsz:,:]
     validation_data = train_data[:vsz,:]
     train_targs = train_targs[vsz:,:]
