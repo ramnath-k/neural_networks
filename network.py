@@ -39,12 +39,12 @@ class Network:
         for l in xrange(len(delta_b)-1, 0, -1):
             delta_b[l] = delta_l
             delta_w[l] = np.dot(delta_l, acts[l].T)
-            delta_l = np.dot(w.T, delta_l)*sigmoid_prime(zs[l])
+            delta_l = np.dot(self.weights[l].T, delta_l)*sigmoid_prime(zs[l])
         cost = self.loss_fn(acts[-1], y)
         return (delta_b, delta_w, cost)
 
     def num_grad(self, x, y):
-        eps = 0.01
+        eps = 1e-2
         bs = [b.copy() for b in self.biases]
         ws = [w.copy() for w in self.weights]
         delta_b = [np.zeros(b.shape) for b in self.biases]
@@ -83,7 +83,7 @@ class Network:
             eb = np.max([eb, np.absolute(bd-bn).max()])
             ew = np.max([ew, np.absolute(wd-wn).max()])
         #print 'Grad diff: Bias=%f Weights=%f' % (np.sqrt(eb), np.sqrt(ew))
-        #print 'Grad diff: Bias=%f Weights=%f' % (eb, ew)
+        print 'Grad diff: Bias=%f Weights=%f' % (eb, ew)
         return (dgb, dgw, cost)
                 
     def loss_fn(self, o, y):
@@ -108,7 +108,7 @@ class Network:
         indx = indx[:mbsz]
         return data[indx], targs[indx]
 
-    def update_mini_batch(self, data, targs, eta):
+    def update_mini_batch(self, data, targs, eta, lambda_w):
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
         cost = 0
@@ -116,22 +116,24 @@ class Network:
             delta_b, delta_w, cost_x = self.bprop(x, y)
             #delta_b, delta_w, cost_x = self.grad_check(x, y)
             nabla_b = [nb + dnb for nb, dnb in zip(nabla_b, delta_b)]
-            nabla_w = [nw + dnw for nw, dnw in zip(nabla_w, delta_w)]
-            cost += cost_x
+            nabla_w = [nw + dnw for nw, dnw, w in zip(nabla_w, delta_w, self.weights)]
+        cost_r = sum(np.linalg.norm(w)**2 for w in self.weights)
+        cost += cost_x + lambda_w*cost_r
         #print "Cost=%f" % cost,
         self.biases = [b - eta*nb for b, nb in zip(self.biases, nabla_b)]
-        self.weights = [w - eta*nw for w, nw in zip(self.weights, nabla_w)]
+        self.weights = [w - eta*(nw + lambda_w*2*w) for w, nw in zip(self.weights, nabla_w)]
         
-    def SGD(self, train_data, train_targs, eta=0.1, epochs=10, mbsz=5, test_data=None, test_targs=None):
+    def SGD(self, train_data, train_targs, eta=0.1, lambda_w=0.1, epochs=10, mbsz=5, test_data=None, test_targs=None):
         num_iter = int(np.ceil(len(train_data)*1.0/mbsz))
         print 'num_iter/epoch=%d' % num_iter
         for epoch in range(epochs):
             print 'epoch=%d' % epoch
             for i in range(num_iter):
                 data, targs = self.sample_mini_batch(train_data, train_targs, mbsz)
-                self.update_mini_batch(data, targs, eta)
+                self.update_mini_batch(data, targs, eta, lambda_w)
             if test_data != None:
-                print 'classification error = %f' % self.classification_error(test_data, test_targs)
+                print 'train error = %f, validation error = %f' % (self.classification_error(train_data, train_targs), 
+self.classification_error(test_data, test_targs))
 
     def classification_error(self, test_data, test_targs):
         n_err = 0
@@ -164,8 +166,9 @@ if __name__ == "__main__":
     train_targs = train_targs[vsz:,:]
     validation_targs = train_targs[:vsz,:]
 
-    net = Network([784, 30, 10])
-    net.SGD(train_data, train_targs, test_data = validation_data, test_targs = validation_targs, eta=1.0/64, mbsz = 64, epochs=30)
+    net = Network([784, 100, 50, 10])
+    net.SGD(train_data, train_targs, test_data = validation_data, test_targs = validation_targs, \
+            eta=1./64., lambda_w = .001, mbsz = 64, epochs=30)
 
     predictions = net.get_predictions(test_data)
     predictions = [p.argmax() for p in predictions]
