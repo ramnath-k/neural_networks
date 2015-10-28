@@ -109,7 +109,7 @@ class Network:
             nabla_b = [nb + dnb for nb, dnb in zip(nabla_b, delta_b)]
             nabla_w = [nw + dnw for nw, dnw in zip(nabla_w, delta_w)]
             cost += cost_x
-        print "Cost=%f" % cost,
+        #print "Cost=%f" % cost,
         self.biases = [b - eta*nb for b, nb in zip(self.biases, nabla_b)]
         self.weights = [w - eta*nw for w, nw in zip(self.weights, nabla_w)]
         
@@ -117,7 +117,7 @@ class Network:
         num_iter = int(np.ceil(len(train_data)*1.0/mbsz))
         print 'num_iter/epoch=%d' % num_iter
         for epoch in range(epochs):
-            print 'epoch=%d' % epoch,
+            print 'epoch=%d' % epoch
             for i in range(num_iter):
                 data, targs = self.sample_mini_batch(train_data, train_targs, mbsz)
                 self.update_mini_batch(data, targs, eta)
@@ -155,7 +155,7 @@ if __name__ == "__main__":
     validation_targs = train_targs[:vsz,:]
 
     net = Network([784, 30, 10])
-    net.SGD(train_data, train_targs, test_data = validation_data, test_targs = validation_targs, eta=3.0/10, mbsz = 10, epochs=30)
+    net.SGD(train_data, train_targs, test_data = validation_data, test_targs = validation_targs, eta=1.0/64, mbsz = 64, epochs=30)
 
     predictions = net.get_predictions(test_data)
     predictions = [p.argmax() for p in predictions]
