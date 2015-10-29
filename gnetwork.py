@@ -123,7 +123,7 @@ if __name__ == "__main__":
     st = time.clock()
     net = Network([784, 200, 100, 50, 10])
     net.SGD(train_data, train_targs, test_data = validation_data, test_targs = validation_targs, \
-            eta=5., lambda_w = 0.0001, mbsz = 64, epochs=300)
+            eta=5., tau=5., lambda_w = 0.0001, mbsz = 64, epochs=300)
     et = time.clock()
     print 'Time elapsed= %f seconds' % (et-st)
 
