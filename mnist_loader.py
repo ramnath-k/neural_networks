@@ -96,3 +96,23 @@ def load_kaggle_mnist_data():
     test_data = test_data.reshape(test_data.shape[0], test_data.shape[1], 1)
     return (train_data, train_targs, test_data)
 
+def vectorized_result_v2(j):
+    """Return a 10-dimensional unit vector with a 1.0 in the jth
+    position and zeroes elsewhere.  This is used to convert a digit
+    (0...9) into a corresponding desired output from the neural
+    network."""
+    e = np.zeros(10)
+    e[j] = 1.0
+    return e
+
+def load_kaggle_mnist_data_v2():
+    import pandas as pd
+    train = pd.read_csv('data/train.csv')
+    test = pd.read_csv('data/test.csv')
+    train_data = train.iloc[:,1:].values/255.
+    train_targs = train.iloc[:,0].values
+    train_targs = np.array([vectorized_result_v2(y) for y in train_targs])
+    test_data = test.values/255.
+    return (train_data, train_targs, test_data)
+
+

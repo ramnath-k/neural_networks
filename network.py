@@ -1,4 +1,5 @@
 import numpy as np
+import time
 
 def sigmoid(z):
     return 1/(1+np.exp(-z))
@@ -120,7 +121,7 @@ class Network:
             delta_b, delta_w, cost_x = self.bprop(x, y)
             #delta_b, delta_w, cost_x = self.grad_check(x, y)
             nabla_b = [nb + dnb for nb, dnb in zip(nabla_b, delta_b)]
-            nabla_w = [nw + dnw for nw, dnw, w in zip(nabla_w, delta_w, self.weights)]
+            nabla_w = [nw + dnw for nw, dnw in zip(nabla_w, delta_w)]
         cost_r = sum(np.linalg.norm(w)**2 for w in self.weights)
         cost += cost_x + lambda_w*cost_r
         #print "Cost=%f" % cost,
@@ -133,10 +134,13 @@ class Network:
         for epoch in range(epochs):
             print 'epoch=%d' % epoch
             eta_e = eta * tau/(tau+epoch)
+            st = time.clock()
             for i in range(num_iter):
                 #data, targs = self.sample_mini_batch(train_data, train_targs, mbsz)
                 data, targs = self.choose_mini_batch(train_data, train_targs, mbsz, i)
                 self.update_mini_batch(data, targs, eta_e, lambda_w, mbsz)
+            et = time.clock()
+            print 'choose mini batch took %f seconds' % (et-st)
             if test_data != None:
                 print 'train error = %f, validation error = %f' % (self.classification_error(train_data, train_targs), 
 self.classification_error(test_data, test_targs))
@@ -172,9 +176,12 @@ if __name__ == "__main__":
     train_targs = train_targs[vsz:,:]
     validation_targs = train_targs[:vsz,:]
 
+    st = time.clock()
     net = Network([784, 200, 100, 50, 10])
     net.SGD(train_data, train_targs, test_data = validation_data, test_targs = validation_targs, \
-            eta=5., lambda_w = 0.0001, mbsz = 64, epochs=300)
+            eta=5., lambda_w = 0.0001, mbsz = 64, epochs=1)
+    et = time.clock()
+    print 'Time elapsed= %f seconds' % (et-st)
 
     predictions = net.get_predictions(test_data)
     predictions = [p.argmax() for p in predictions]
