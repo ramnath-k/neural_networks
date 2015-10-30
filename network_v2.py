@@ -1,5 +1,5 @@
 import numpy as np
-import gnumpy as gnp
+import numpy as gnp
 import time
 
 def sigmoid(z):
@@ -13,8 +13,8 @@ class Network:
         self.sizes = sizes;
         self.shapes = [(sizes[i], sizes[i+1]) for i in range(0, len(sizes)-1)]
         print 'Shapes',self.shapes
-        self.weights = [gnp.garray(np.random.randn(shape[0],shape[1])) for shape in self.shapes]
-        self.biases = [gnp.garray(np.random.randn(1, shape[1])) for shape in self.shapes]
+        self.weights = [gnp.array(np.random.randn(shape[0],shape[1])) for shape in self.shapes]
+        self.biases = [gnp.array(np.random.randn(1, shape[1])) for shape in self.shapes]
         print 'Weights', [w.shape for w in self.weights]
         print 'Biases', [b.shape for b in self.biases]
         self.WGrads = [gnp.zeros(w.shape) for w in self.weights]
@@ -84,7 +84,7 @@ class Network:
             self.weights[i] -= eta/mbsz*(self.WGrads[i] + lambda_w*2*self.weights[i])
         return n_err
         
-    def SGD(self, train_data, train_targs, eta=0.1, tau = 10., lambda_w=0.1, epochs=10, mbsz=5, test_data=gnp.garray(0), test_targs=gnp.garray(0)):
+    def SGD(self, train_data, train_targs, eta=0.1, tau = 10., lambda_w=0.1, epochs=10, mbsz=5, test_data=gnp.array(0), test_targs=gnp.array(0)):
         num_iter = int(np.ceil(len(train_data)*1.0/mbsz))
         print 'num_iter/epoch=%d' % num_iter
         for epoch in range(epochs):
@@ -118,10 +118,10 @@ if __name__ == "__main__":
 
     vsz = int(np.ceil(train_data.shape[0]*0.2))
     print 'Validation set size = %d' % vsz
-    train_data = gnp.garray(train_data[vsz:,:])
-    validation_data = gnp.garray(train_data[:vsz,:])
-    train_targs = gnp.garray(train_targs[vsz:,:])
-    validation_targs = gnp.garray(train_targs[:vsz,:])
+    train_data = gnp.array(train_data[vsz:,:])
+    validation_data = gnp.array(train_data[:vsz,:])
+    train_targs = gnp.array(train_targs[vsz:,:])
+    validation_targs = gnp.array(train_targs[:vsz,:])
 
     st = time.clock()
     net = Network([784, 200, 100, 50, 10])
@@ -138,4 +138,5 @@ if __name__ == "__main__":
     df.index += 1
     df.index.names = ['ImageId']
     df.to_csv('data/submission.csv')
+
 
