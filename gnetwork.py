@@ -64,7 +64,7 @@ class Network:
             self.biasGrads[i] *= scale
 
     def choose_mini_batch(self, data, targs, mbsz, n):
-        indx = np.arange(n*mbsz,(n+1)*mbsz)
+        indx = np.arange(n*mbsz,np.min([(n+1)*mbsz, len(data)]))
         return data[indx], targs[indx]
 
     def sample_mini_batch(self, data, targs, mbsz):

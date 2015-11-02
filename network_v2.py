@@ -64,7 +64,7 @@ class Network:
             self.biasGrads[i] *= scale
 
     def choose_mini_batch(self, data, targs, mbsz, n):
-        indx = np.arange(n*mbsz,(n+1)*mbsz)
+        indx = np.arange(n*mbsz,np.min([(n+1)*mbsz, len(data)]))
         return data[indx], targs[indx]
 
     def sample_mini_batch(self, data, targs, mbsz):
@@ -126,7 +126,7 @@ if __name__ == "__main__":
     st = time.clock()
     net = Network([784, 200, 100, 50, 10])
     net.SGD(train_data, train_targs, test_data = validation_data, test_targs = validation_targs, \
-            eta=5., tau=5., lambda_w = 0.0001, mbsz = 64, epochs=3)
+            eta=5., tau=5., lambda_w = 0.0001, mbsz = 1000, epochs=3)
     et = time.clock()
     print 'Time elapsed= %f seconds' % (et-st)
 
